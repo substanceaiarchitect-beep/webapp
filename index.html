@@ -1,86 +1,172 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Substance Deployment Wizard</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
+:root {
+--bg: var(--tg-theme-bg-color, #0f0f11);
+--card-bg: var(--tg-theme-secondary-bg-color, #18181b);
+--text: var(--tg-theme-text-color, #f4f4f5);
+--muted: var(--tg-theme-hint-color, #71717a);
+--accent: var(--tg-theme-button-color, #3b82f6);
+--accent-text: var(--tg-theme-button-text-color, #ffffff);
+--border: rgba(255, 255, 255, 0.08);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body {
-background-color: var(--tg-theme-bg-color, #121212);
-color: var(--tg-theme-text-color, #ffffff);
-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+background-color: var(--bg);
+color: var(--text);
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 padding: 16px;
 margin: 0;
+line-height: 1.4;
 }
-h2 { font-size: 18px; margin-bottom: 8px; }
-p { font-size: 13px; color: #888; margin-top: 0; }
-label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 4px; }
+
+.header { margin-bottom: 20px; }
+.header h2 { font-size: 19px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.02em; }
+.header p { font-size: 13px; color: var(--muted); margin: 0; }
+
+.field-group {
+background: var(--card-bg);
+border: 1px solid var(--border);
+border-radius: 12px;
+padding: 14px;
+margin-bottom: 14px;
+}
+
+label {
+display: block;
+font-size: 13px;
+font-weight: 600;
+margin-bottom: 4px;
+color: var(--text);
+}
+
+.hint {
+font-size: 11px;
+color: var(--muted);
+margin-bottom: 8px;
+}
+
+.hint a {
+color: var(--accent);
+text-decoration: none;
+font-weight: 500;
+}
+
 select, input {
 width: 100%;
-box-sizing: border-box;
-padding: 10px;
+padding: 11px 12px;
 border-radius: 8px;
-border: 1px solid #333;
-background: var(--tg-theme-secondary-bg-color, #1e1e1e);
+border: 1px solid var(--border);
+background: rgba(0, 0, 0, 0.2);
 color: #fff;
 font-size: 14px;
+outline: none;
+transition: border-color 0.2s;
 }
-button {
+
+select:focus, input:focus {
+border-color: var(--accent);
+}
+
+.btn {
 width: 100%;
-margin-top: 24px;
-padding: 12px;
-border-radius: 8px;
+margin-top: 10px;
+padding: 14px;
+border-radius: 10px;
 border: none;
-background: var(--tg-theme-button-color, #2481cc);
-color: var(--tg-theme-button-text-color, #ffffff);
+background: var(--accent);
+color: var(--accent-text);
 font-size: 15px;
-font-weight: bold;
+font-weight: 600;
 cursor: pointer;
+display: flex;
+justify-content: center;
+align-items: center;
+gap: 8px;
 }
+
+.btn:active { opacity: 0.85; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>
 </head>
 <body>
+
+<div class="header">
 <h2>⚡ Deployment Setup</h2>
-<p>Configure your automated intake gateway in 2 minutes.</p>
+<p>Сконфигурируйте шлюз за 2 минуты. Данные передаются в зашифрованном виде.</p>
+</div>
 
 <form id="wizardForm">
-<label>1. Where do your leads come from?</label>
+
+<div class="field-group">
+<label>1. Источник заявок (Source)</label>
+<div class="hint">Откуда бот будет забирать входящие заявки на анализ</div>
 <select id="source">
-<option value="tally">Tally.so Form</option>
-<option value="google_forms">Google Forms</option>
-<option value="telegram_dm">Telegram Direct</option>
-<option value="custom_webhook">Custom Webhook (API)</option>
+<option value="tally">Tally.so Form (Рекомендуется)</option>
+<option value="google_forms">Google Таблицы / Формы</option>
+<option value="telegram_dm">Telegram Direct (Сообщения боту)</option>
+<option value="custom_webhook">Custom Webhook (API CRM)</option>
 </select>
+</div>
 
-<label>2. Notification Destination</label>
+<div class="field-group">
+<label>2. Куда отправлять триаж-карточки (Output)</label>
+<div class="hint">Канал, где оператор будет принимать решения кнопками</div>
 <select id="output">
-<option value="telegram_chat">This Telegram Chat</option>
-<option value="notion">Notion Database</option>
-<option value="slack">Slack Channel</option>
+<option value="telegram_chat">В этот диалог Telegram</option>
+<option value="notion">База данных Notion</option>
+<option value="slack">Корпоративный Slack-канал</option>
 </select>
+</div>
 
+<div class="field-group">
 <label>3. OpenAI API Key</label>
-<input type="password" id="openai_key" placeholder="sk-..." required>
+<div class="hint">
+Ключ нейросети для оценки лидов. Создайте в
+<a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a>
+</div>
+<input type="password" id="openai_key" placeholder="sk-proj-..." required autocomplete="off">
+</div>
 
-<label>4. Telegram Bot Token (from @BotFather)</label>
-<input type="password" id="bot_token" placeholder="712345678:AAH..." required>
+<div class="field-group">
+<label>4. Telegram Bot Token</label>
+<div class="hint">
+Токен бота для отправки уведомлений. Создайте бота через
+<a href="https://t.me/BotFather" target="_blank">@BotFather</a> (команда /newbot)
+</div>
+<input type="password" id="bot_token" placeholder="712345678:AAH..." required autocomplete="off">
+</div>
 
-<button type="submit" id="submitBtn">Save Configuration & Deploy</button>
+<button type="submit" id="submitBtn" class="btn">
+<span>Сохранить конфигурацию</span>
+</button>
 </form>
 
 <script>
-const tg = window.Telegram.WebApp;
+const tg = window.Telegram?.WebApp;
+if (tg) {
 tg.expand();
+tg.enableClosingConfirmation(); // Защита от случайного смахивания шторки
+}
 
-// Забираем user_id из параметров ссылки
 const urlParams = new URLSearchParams(window.location.search);
-const userId = urlParams.get('user_id') || tg.initDataUnsafe?.user?.id || "unknown";
+const userId = urlParams.get('user_id') || tg?.initDataUnsafe?.user?.id || "unknown";
 
 document.getElementById('wizardForm').addEventListener('submit', async (e) => {
 e.preventDefault();
+
+// Легкая вибрация при клике
+if (tg?.HapticFeedback) {
+tg.HapticFeedback.impactOccurred('medium');
+}
+
 const btn = document.getElementById('submitBtn');
-btn.innerText = "Transmitting...";
+btn.innerText = "Сохранение...";
 btn.disabled = true;
 
 const payload = {
@@ -94,7 +180,7 @@ tg_bot: document.getElementById('bot_token').value.trim()
 timestamp: new Date().toISOString()
 };
 
-// URL вебхука в Make.com для приема конфигурации
+// Вставь сюда URL вебхука из Make.com
 const MAKE_WEBHOOK_URL = "ВСТАВИТЬ_СЮДА_WEBHOOK_URL_MAKE";
 
 try {
@@ -103,10 +189,22 @@ method: "POST",
 headers: { "Content-Type": "application/json" },
 body: JSON.stringify(payload)
 });
-tg.close();
+
+if (tg?.HapticFeedback) {
+tg.HapticFeedback.notificationOccurred('success');
+}
+
+btn.innerText = "Готово!";
+setTimeout(() => {
+if (tg) tg.close();
+}, 600);
+
 } catch (err) {
-alert("Transmission error. Please try again.");
-btn.innerText = "Save Configuration & Deploy";
+if (tg?.HapticFeedback) {
+tg.HapticFeedback.notificationOccurred('error');
+}
+alert("Ошибка отправки. Проверьте соединение.");
+btn.innerText = "Сохранить конфигурацию";
 btn.disabled = false;
 }
 });
