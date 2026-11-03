@@ -2,157 +2,337 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Substance Deployment Wizard</title>
+<title>Substance — Deployment Wizard</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root {
---bg: var(--tg-theme-bg-color, #0f0f11);
---card-bg: var(--tg-theme-secondary-bg-color, #18181b);
---text: var(--tg-theme-text-color, #f4f4f5);
---muted: var(--tg-theme-hint-color, #71717a);
---accent: var(--tg-theme-button-color, #3b82f6);
---accent-text: var(--tg-theme-button-text-color, #ffffff);
---border: rgba(255, 255, 255, 0.08);
+--bg: #12070C;
+--card: #1C0E14;
+--border: rgba(247, 36, 133, 0.15);
+--border-focus: #F72485;
+--text: #FFFFFF;
+--muted: rgba(255, 255, 255, 0.45);
+--magenta: #F72485;
+--magenta-dim: rgba(247, 36, 133, 0.12);
+--input-bg: rgba(0, 0, 0, 0.35);
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
 body {
-background-color: var(--bg);
+background: var(--bg);
 color: var(--text);
 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-padding: 16px;
+padding: 20px 16px 32px;
 margin: 0;
 line-height: 1.4;
+min-height: 100vh;
 }
 
-.header { margin-bottom: 20px; }
-.header h2 { font-size: 19px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.02em; }
-.header p { font-size: 13px; color: var(--muted); margin: 0; }
+/* ---------- Header ---------- */
+.header {
+display: flex;
+align-items: center;
+gap: 14px;
+margin-bottom: 24px;
+}
 
+.logo {
+width: 44px;
+height: 44px;
+flex-shrink: 0;
+position: relative;
+}
+
+.logo svg { display: block; }
+
+.header-text h2 {
+font-size: 18px;
+font-weight: 700;
+margin: 0 0 3px;
+letter-spacing: 0.02em;
+}
+
+.header-text p {
+font-size: 12px;
+color: var(--muted);
+margin: 0;
+letter-spacing: 0.03em;
+}
+
+/* ---------- Step indicator ---------- */
+.steps {
+display: flex;
+gap: 6px;
+margin-bottom: 20px;
+}
+
+.step-dot {
+height: 3px;
+flex: 1;
+border-radius: 2px;
+background: rgba(247, 36, 133, 0.15);
+overflow: hidden;
+position: relative;
+}
+
+.step-dot::after {
+content: '';
+position: absolute;
+inset: 0;
+background: var(--magenta);
+transform: scaleX(0);
+transform-origin: left;
+transition: transform 0.4s ease;
+}
+
+.step-dot.active::after { transform: scaleX(1); }
+
+/* ---------- Cards ---------- */
 .field-group {
-background: var(--card-bg);
+background: var(--card);
 border: 1px solid var(--border);
-border-radius: 12px;
-padding: 14px;
-margin-bottom: 14px;
+border-radius: 14px;
+padding: 16px;
+margin-bottom: 12px;
+transition: border-color 0.25s;
 }
 
-label {
-display: block;
+.field-group:focus-within {
+border-color: var(--border-focus);
+box-shadow: 0 0 0 3px var(--magenta-dim);
+}
+
+.field-label {
+display: flex;
+align-items: center;
+gap: 8px;
 font-size: 13px;
 font-weight: 600;
 margin-bottom: 4px;
 color: var(--text);
 }
 
+.step-num {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+width: 20px;
+height: 20px;
+border-radius: 6px;
+background: var(--magenta-dim);
+color: var(--magenta);
+font-size: 11px;
+font-weight: 700;
+flex-shrink: 0;
+}
+
 .hint {
 font-size: 11px;
 color: var(--muted);
-margin-bottom: 8px;
+margin-bottom: 10px;
+margin-left: 28px;
 }
 
 .hint a {
-color: var(--accent);
+color: var(--magenta);
 text-decoration: none;
 font-weight: 500;
 }
 
+/* ---------- Inputs ---------- */
 select, input {
 width: 100%;
-padding: 11px 12px;
-border-radius: 8px;
+padding: 12px 14px;
+border-radius: 10px;
 border: 1px solid var(--border);
-background: rgba(0, 0, 0, 0.2);
-color: #fff;
+background: var(--input-bg);
+color: var(--text);
 font-size: 14px;
 outline: none;
 transition: border-color 0.2s;
+appearance: none;
+-webkit-appearance: none;
+}
+
+select {
+background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23F72485' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+background-repeat: no-repeat;
+background-position: right 14px center;
+padding-right: 40px;
+cursor: pointer;
+}
+
+select option {
+background: #1C0E14;
+color: #fff;
 }
 
 select:focus, input:focus {
-border-color: var(--accent);
+border-color: var(--border-focus);
 }
 
+input::placeholder {
+color: rgba(255, 255, 255, 0.25);
+font-family: monospace;
+font-size: 13px;
+}
+
+/* ---------- Button ---------- */
 .btn {
 width: 100%;
-margin-top: 10px;
-padding: 14px;
-border-radius: 10px;
+margin-top: 16px;
+padding: 15px;
+border-radius: 12px;
 border: none;
-background: var(--accent);
-color: var(--accent-text);
+background: var(--magenta);
+color: #fff;
 font-size: 15px;
-font-weight: 600;
+font-weight: 700;
+letter-spacing: 0.04em;
 cursor: pointer;
 display: flex;
 justify-content: center;
 align-items: center;
 gap: 8px;
+transition: opacity 0.2s, transform 0.1s;
+position: relative;
+overflow: hidden;
 }
 
-.btn:active { opacity: 0.85; }
+.btn::before {
+content: '';
+position: absolute;
+inset: 0;
+background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%);
+transform: translateX(-100%);
+}
+
+.btn:active { transform: scale(0.98); }
+.btn:active::before { transform: translateX(100%); transition: transform 0.5s; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ---------- Footer ---------- */
+.footer {
+text-align: center;
+margin-top: 20px;
+font-size: 11px;
+color: var(--muted);
+letter-spacing: 0.05em;
+}
+
+.footer span { color: var(--magenta); }
 </style>
 </head>
 <body>
 
+<!-- Header -->
 <div class="header">
-<h2>⚡ Deployment Setup</h2>
-<p>Сконфигурируйте шлюз за 2 минуты. Данные передаются в зашифрованном виде.</p>
+<div class="logo">
+<svg width="44" height="44" viewBox="0 0 100 100" fill="none">
+<defs>
+<clipPath id="pa"><polygon points="0,0 96,0 0,96"/></clipPath>
+<clipPath id="pb"><polygon points="100,4 100,100 4,100"/></clipPath>
+</defs>
+<circle cx="50" cy="50" r="47" stroke="#F72485" stroke-width="1.5" opacity="0.55"/>
+<circle cx="50" cy="50" r="42" fill="#F72485" opacity="0.15"/>
+<g clip-path="url(#pa)"><circle cx="50" cy="50" r="42" fill="#F72485"/></g>
+<g clip-path="url(#pb)"><circle cx="50" cy="50" r="42" fill="#F72485"/></g>
+</svg>
+</div>
+<div class="header-text">
+<h2>SUBSTANCE<span style="color:#F72485;font-weight:400;font-size:13px;"> AI</span></h2>
+<p>Deployment Wizard</p>
+</div>
 </div>
 
-<form id="wizardForm">
+<!-- Step indicator -->
+<div class="steps">
+<div class="step-dot active" id="dot1"></div>
+<div class="step-dot" id="dot2"></div>
+<div class="step-dot" id="dot3"></div>
+<div class="step-dot" id="dot4"></div>
+</div>
 
-<div class="field-group">
-<label>1. Источник заявок (Source)</label>
-<div class="hint">Откуда бот будет забирать входящие заявки на анализ</div>
+<form id="wizardForm" autocomplete="off">
+
+<div class="field-group" data-step="1">
+<div class="field-label">
+<span class="step-num">01</span>
+Inbound Lead Source
+</div>
+<div class="hint">Where the AI engine ingests unverified leads</div>
 <select id="source">
-<option value="tally">Tally.so Form (Рекомендуется)</option>
-<option value="google_forms">Google Таблицы / Формы</option>
-<option value="telegram_dm">Telegram Direct (Сообщения боту)</option>
-<option value="custom_webhook">Custom Webhook (API CRM)</option>
+<option value="tally">Tally.so Form — Recommended</option>
+<option value="google_forms">Google Sheets / Forms</option>
+<option value="telegram_dm">Telegram Direct Inquiries</option>
+<option value="custom_webhook">Custom Inbound Webhook</option>
 </select>
 </div>
 
-<div class="field-group">
-<label>2. Куда отправлять триаж-карточки (Output)</label>
-<div class="hint">Канал, где оператор будет принимать решения кнопками</div>
+<div class="field-group" data-step="2">
+<div class="field-label">
+<span class="step-num">02</span>
+Triage Output Destination
+</div>
+<div class="hint">Target channel for approval dossiers</div>
 <select id="output">
-<option value="telegram_chat">В этот диалог Telegram</option>
-<option value="notion">База данных Notion</option>
-<option value="slack">Корпоративный Slack-канал</option>
+<option value="telegram_chat">This Telegram Operations Chat</option>
+<option value="notion">Notion Master Database</option>
+<option value="slack">Corporate Slack Pipeline</option>
 </select>
 </div>
 
-<div class="field-group">
-<label>3. OpenAI API Key</label>
+<div class="field-group" data-step="3">
+<div class="field-label">
+<span class="step-num">03</span>
+OpenAI API Key
+</div>
 <div class="hint">
-Ключ нейросети для оценки лидов. Создайте в
+Inference engine token →
 <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a>
 </div>
-<input type="password" id="openai_key" placeholder="sk-proj-..." required autocomplete="off">
+<input type="password" id="openai_key" placeholder="sk-proj-..." required>
 </div>
 
-<div class="field-group">
-<label>4. Telegram Bot Token</label>
-<div class="hint">
-Токен бота для отправки уведомлений. Создайте бота через
-<a href="https://t.me/BotFather" target="_blank">@BotFather</a> (команда /newbot)
+<div class="field-group" data-step="4">
+<div class="field-label">
+<span class="step-num">04</span>
+Telegram Bot Token
 </div>
-<input type="password" id="bot_token" placeholder="712345678:AAH..." required autocomplete="off">
+<div class="hint">
+Dedicated dispatch token →
+<a href="https://t.me/BotFather" target="_blank">@BotFather</a> (/newbot)
+</div>
+<input type="password" id="bot_token" placeholder="712345678:AAH..." required>
 </div>
 
 <button type="submit" id="submitBtn" class="btn">
-<span>Сохранить конфигурацию</span>
+<span id="btnText">Confirm & Deploy</span>
 </button>
 </form>
+
+<div class="footer">
+Encrypted payload · Zero-call policy · <span>24h deployment</span>
+</div>
 
 <script>
 const tg = window.Telegram?.WebApp;
 if (tg) {
 tg.expand();
-tg.enableClosingConfirmation(); // Защита от случайного смахивания шторки
+tg.enableClosingConfirmation();
+tg.setHeaderColor('#12070C');
+tg.setBackgroundColor('#12070C');
 }
+
+// Step indicator
+const groups = document.querySelectorAll('.field-group');
+const dots = document.querySelectorAll('.step-dot');
+groups.forEach((g, i) => {
+g.addEventListener('focusin', () => {
+dots.forEach((d, j) => d.classList.toggle('active', j <= i));
+});
+});
 
 const urlParams = new URLSearchParams(window.location.search);
 const userId = urlParams.get('user_id') || tg?.initDataUnsafe?.user?.id || "unknown";
@@ -160,13 +340,11 @@ const userId = urlParams.get('user_id') || tg?.initDataUnsafe?.user?.id || "unkn
 document.getElementById('wizardForm').addEventListener('submit', async (e) => {
 e.preventDefault();
 
-// Легкая вибрация при клике
-if (tg?.HapticFeedback) {
-tg.HapticFeedback.impactOccurred('medium');
-}
+if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
 
 const btn = document.getElementById('submitBtn');
-btn.innerText = "Сохранение...";
+const btnText = document.getElementById('btnText');
+btnText.innerText = "Transmitting...";
 btn.disabled = true;
 
 const payload = {
@@ -180,7 +358,6 @@ tg_bot: document.getElementById('bot_token').value.trim()
 timestamp: new Date().toISOString()
 };
 
-// Вставь сюда URL вебхука из Make.com
 const MAKE_WEBHOOK_URL = "ВСТАВИТЬ_СЮДА_WEBHOOK_URL_MAKE";
 
 try {
@@ -190,21 +367,15 @@ headers: { "Content-Type": "application/json" },
 body: JSON.stringify(payload)
 });
 
-if (tg?.HapticFeedback) {
-tg.HapticFeedback.notificationOccurred('success');
-}
+if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+btnText.innerText = "Deployment Verified ✓";
+dots.forEach(d => d.classList.add('active'));
 
-btn.innerText = "Готово!";
-setTimeout(() => {
-if (tg) tg.close();
-}, 600);
+setTimeout(() => { if (tg) tg.close(); }, 800);
 
 } catch (err) {
-if (tg?.HapticFeedback) {
-tg.HapticFeedback.notificationOccurred('error');
-}
-alert("Ошибка отправки. Проверьте соединение.");
-btn.innerText = "Сохранить конфигурацию";
+if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+btnText.innerText = "Transmission Failed — Retry";
 btn.disabled = false;
 }
 });
