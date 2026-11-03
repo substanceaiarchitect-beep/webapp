@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Substance Deployment Wizard</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+body {
+background-color: var(--tg-theme-bg-color, #121212);
+color: var(--tg-theme-text-color, #ffffff);
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+padding: 16px;
+margin: 0;
+}
+h2 { font-size: 18px; margin-bottom: 8px; }
+p { font-size: 13px; color: #888; margin-top: 0; }
+label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 4px; }
+select, input {
+width: 100%;
+box-sizing: border-box;
+padding: 10px;
+border-radius: 8px;
+border: 1px solid #333;
+background: var(--tg-theme-secondary-bg-color, #1e1e1e);
+color: #fff;
+font-size: 14px;
+}
+button {
+width: 100%;
+margin-top: 24px;
+padding: 12px;
+border-radius: 8px;
+border: none;
+background: var(--tg-theme-button-color, #2481cc);
+color: var(--tg-theme-button-text-color, #ffffff);
+font-size: 15px;
+font-weight: bold;
+cursor: pointer;
+}
+</style>
+</head>
+<body>
+<h2>⚡ Deployment Setup</h2>
+<p>Configure your automated intake gateway in 2 minutes.</p>
+
+<form id="wizardForm">
+<label>1. Where do your leads come from?</label>
+<select id="source">
+<option value="tally">Tally.so Form</option>
+<option value="google_forms">Google Forms</option>
+<option value="telegram_dm">Telegram Direct</option>
+<option value="custom_webhook">Custom Webhook (API)</option>
+</select>
+
+<label>2. Notification Destination</label>
+<select id="output">
+<option value="telegram_chat">This Telegram Chat</option>
+<option value="notion">Notion Database</option>
+<option value="slack">Slack Channel</option>
+</select>
+
+<label>3. OpenAI API Key</label>
+<input type="password" id="openai_key" placeholder="sk-..." required>
+
+<label>4. Telegram Bot Token (from @BotFather)</label>
+<input type="password" id="bot_token" placeholder="712345678:AAH..." required>
+
+<button type="submit" id="submitBtn">Save Configuration & Deploy</button>
+</form>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.expand();
+
+// Забираем user_id из параметров ссылки
+const urlParams = new URLSearchParams(window.location.search);
+const userId = urlParams.get('user_id') || tg.initDataUnsafe?.user?.id || "unknown";
+
+document.getElementById('wizardForm').addEventListener('submit', async (e) => {
+e.preventDefault();
+const btn = document.getElementById('submitBtn');
+btn.innerText = "Transmitting...";
+btn.disabled = true;
+
+const payload = {
+user_id: userId,
+source: document.getElementById('source').value,
+output: document.getElementById('output').value,
+keys: {
+openai: document.getElementById('openai_key').value.trim(),
+tg_bot: document.getElementById('bot_token').value.trim()
+},
+timestamp: new Date().toISOString()
+};
+
+// URL вебхука в Make.com для приема конфигурации
+const MAKE_WEBHOOK_URL = "ВСТАВИТЬ_СЮДА_WEBHOOK_URL_MAKE";
+
+try {
+await fetch(MAKE_WEBHOOK_URL, {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify(payload)
+});
+tg.close();
+} catch (err) {
+alert("Transmission error. Please try again.");
+btn.innerText = "Save Configuration & Deploy";
+btn.disabled = false;
+}
+});
+</script>
+</body>
+</html>
