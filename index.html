@@ -240,4 +240,148 @@ letter-spacing: 0.05em;
 </svg>
 </div>
 <div class="header-text">
-<h2>SUBSTANCE<span style="color
+<h2>SUBSTANCE<span style="color:#F72485;font-weight:400;font-size:13px;"> AI</span></h2>
+<p>Deployment Wizard</p>
+</div>
+</div>
+
+<!-- Step indicator -->
+<div class="steps">
+<div class="step-dot active" id="dot1"></div>
+<div class="step-dot" id="dot2"></div>
+<div class="step-dot" id="dot3"></div>
+<div class="step-dot" id="dot4"></div>
+</div>
+
+<form id="wizardForm" autocomplete="off">
+
+<div class="field-group" data-step="1">
+<div class="field-label">
+<span class="step-num">01</span>
+Inbound Lead Source
+</div>
+<div class="hint">Where the AI engine ingests unverified leads</div>
+<select id="source">
+<option value="tally">Tally.so Form — Recommended</option>
+<option value="google_forms">Google Sheets / Forms</option>
+<option value="telegram_dm">Telegram Direct Inquiries</option>
+<option value="custom_webhook">Custom Inbound Webhook</option>
+</select>
+</div>
+
+<div class="field-group" data-step="2">
+<div class="field-label">
+<span class="step-num">02</span>
+Triage Output Destination
+</div>
+<div class="hint">Target channel for approval dossiers</div>
+<select id="output">
+<option value="telegram_chat">This Telegram Operations Chat</option>
+<option value="notion">Notion Master Database</option>
+<option value="slack">Corporate Slack Pipeline</option>
+</select>
+</div>
+
+<div class="field-group" data-step="3">
+<div class="field-label">
+<span class="step-num">03</span>
+OpenAI / Anthropic API Key
+</div>
+<div class="hint">
+Inference token →
+<a href="https://platform.openai.com/api-keys" target="_blank">OpenAI</a> or <a href="https://console.anthropic.com/settings/keys" target="_blank">Anthropic Claude</a>
+</div>
+<input type="password" id="openai_key" placeholder="sk-proj-... or sk-ant-..." required>
+</div>
+
+<div class="field-group" data-step="4">
+<div class="field-label">
+<span class="step-num">04</span>
+Telegram Bot Token
+</div>
+<div class="hint">
+Dedicated dispatch token →
+<a href="https://t.me/BotFather" target="_blank">@BotFather</a> (/newbot)
+</div>
+<input type="password" id="bot_token" placeholder="712345678:AAH..." required>
+</div>
+
+<button type="submit" id="submitBtn" class="btn">
+<span id="btnText">Confirm & Deploy</span>
+</button>
+</form>
+
+<div class="footer">
+Encrypted payload · Zero-call policy · <span>24h deployment</span>
+</div>
+
+<script>
+const tg = window.Telegram?.WebApp;
+if (tg) {
+tg.expand();
+tg.enableClosingConfirmation();
+tg.setHeaderColor('#12070C');
+tg.setBackgroundColor('#12070C');
+}
+
+// Step indicator
+const groups = document.querySelectorAll('.field-group');
+const dots = document.querySelectorAll('.step-dot');
+groups.forEach((g, i) => {
+g.addEventListener('focusin', () => {
+dots.forEach((d, j) => d.classList.toggle('active', j <= i));
+});
+});
+
+const urlParams = new URLSearchParams(window.location.search);
+const userId = urlParams.get('user_id') || tg?.initDataUnsafe?.user?.id || "unknown";
+
+document.getElementById('wizardForm').addEventListener('submit', async (e) => {
+e.preventDefault();
+
+if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+const btn = document.getElementById('submitBtn');
+const btnText = document.getElementById('btnText');
+btnText.innerText = "Transmitting...";
+btn.disabled = true;
+
+const rawLlmKey = document.getElementById('openai_key').value.trim();
+const llmProvider = rawLlmKey.startsWith('sk-ant-') ? 'anthropic' : 'openai';
+
+const payload = {
+user_id: userId,
+source: document.getElementById('source').value,
+output: document.getElementById('output').value,
+llm_provider: llmProvider,
+keys: {
+openai: rawLlmKey,
+tg_bot: document.getElementById('bot_token').value.trim()
+},
+timestamp: new Date().toISOString()
+};
+
+const MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/h9pvb4yw9rkqg41xe59c8o0l062xjt3a";
+
+try {
+await fetch(MAKE_WEBHOOK_URL, {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify(payload)
+});
+
+if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+btnText.innerText = "Deployment Verified ✓";
+dots.forEach(d => d.classList.add('active'));
+
+setTimeout(() => { if (tg) tg.close(); }, 800);
+
+} catch (err) {
+if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+btnText.innerText = "Transmission Failed — Retry";
+btn.disabled = false;
+}
+});
+</script>
+</body>
+</html>
