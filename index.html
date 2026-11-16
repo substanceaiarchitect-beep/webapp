@@ -1,5 +1,4 @@
-<!DOCTYPE html><html lang="en"><head>
-<meta charset="UTF-8">
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Substance — Deployment Wizard</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -347,21 +346,28 @@ btnText.innerText = "Transmitting...";
 btn.disabled = true;
 
 const rawLlmKey = document.getElementById('openai_key').value.trim();
+const selectedSource = document.getElementById('source').value;
+const selectedOutput = document.getElementById('output').value;
+const botToken = document.getElementById('bot_token').value.trim();
 const llmProvider = rawLlmKey.startsWith('sk-ant-') ? 'anthropic' : 'openai';
 
 const payload = {
+chat_id: userId,
+api_key: rawLlmKey,
+form_url: `${selectedSource} -> ${selectedOutput}`,
+scoring_rubric: `Bot Token: ${botToken}`,
 user_id: userId,
-source: document.getElementById('source').value,
-output: document.getElementById('output').value,
+source: selectedSource,
+output: selectedOutput,
 llm_provider: llmProvider,
 keys: {
 openai: rawLlmKey,
-tg_bot: document.getElementById('bot_token').value.trim()
+tg_bot: botToken
 },
 timestamp: new Date().toISOString()
 };
 
-const MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/h9pvb4yw9rkqg41xe59c8o0l062xjt3a";
+const MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/9uaslis02pzojrxb6y8txhb8kk3q66si";
 
 try {
 await fetch(MAKE_WEBHOOK_URL, {
